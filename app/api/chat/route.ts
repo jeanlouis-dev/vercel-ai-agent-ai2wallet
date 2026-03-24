@@ -13,7 +13,7 @@ import getAi2walletTools from 'ai2wallet-sdk/tools';
 const mcpServerURL = process.env.MCP_SERVER_URL as string;
 
 // Allow streaming responses up to 320 seconds
-export const maxDuration = 320;
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
         messages: await convertToModelMessages(messages),
         tools,
         stopWhen: stepCountIs(2),
-        timeout: { totalMs: 320000 }
+        timeout: { totalMs: 300000 }
       });
 
       writer.merge(result.toUIMessageStream());
