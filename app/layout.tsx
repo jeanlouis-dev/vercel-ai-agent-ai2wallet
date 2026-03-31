@@ -4,10 +4,6 @@ import "./globals.css";
 import "ai2wallet-sdk/dist/client/style.css";
 import { Ai2walletProvider } from "ai2wallet-sdk";
 
-type ReownNetwork = 'testnet' | 'mainnet'
-const reown_project_id = process.env.REOWN_PROJECT_ID as string;
-const reown_network = process.env.REOWN_NETWORK as ReownNetwork;
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -33,7 +29,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Ai2walletProvider reown={{ projectId: reown_project_id, network: reown_network }}>{children}</Ai2walletProvider>
+        <Ai2walletProvider>{children}</Ai2walletProvider>
       </body>
     </html>
   );

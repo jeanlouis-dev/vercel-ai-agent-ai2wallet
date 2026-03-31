@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
         messages: await convertToModelMessages(messages),
         tools,
-        stopWhen: stepCountIs(2),
+        //stopWhen: stepCountIs(1),
         timeout: { totalMs: 300000 }
       });
 
