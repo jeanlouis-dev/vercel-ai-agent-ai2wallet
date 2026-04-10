@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vercel AI SDK Agent Example
+## Prerequisites
 
-## Getting Started
+Create `.env.local` file and fill required environment variables
+- `MCP_SERVER_URL` - Your Ai2wallet MCP Server URL up and running
+- `GOOGLE_GENERATIVE_AI_API_KEY` - LLM provider API Key (you can use any provider to fit your needs)
 
-First, run the development server:
+## Quick Start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/jeanlouis-dev/vercel-ai-agent-ai2wallet.git
+cd vercel-ai-agent-ai2wallet
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```bash
+npm install && npm run dev
+```
+or
+```bash
+npm install && npm run build && npm start
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open [http://localhost:3000](http://localhost:3000)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## From scratch
 
-## Learn More
+First create your next.js App Router Vercel ai agent
+### Installation
 
-To learn more about Next.js, take a look at the following resources:
+Run the following command inside your root directory
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm install ai2wallet-sdk
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+#### Update `app/layout.tsx`
 
-## Deploy on Vercel
+```typescript
+import "ai2wallet-sdk/dist/client/style.css";
+import { Ai2walletProvider } from "ai2wallet-sdk";
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+//Wrap your whole app with Ai2walletProvider
+<html lang="en">
+    <body>
+        <Ai2walletProvider>{children}</Ai2walletProvider>
+    </body>
+</html>
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+```
+
+#### Update your root page `app/page.tsx`
+
+```typescript
+'use client';
+// Other imports
+import { ai2walletParser, Ai2walletRenderer } from "ai2wallet-sdk";
+.............
+{messages.map(message => (
+    {ai2walletParser(message).parts.map((part: UIMessagePart<UIDataTypes, UITools>, i: number) => {
+        if (part.type === "text" && message.role === "user") {
+            return (
+                <div key={`${message.id}-${i}`}>
+                    {part.text}
+                </div>
+            );
+        }
+        if (message.role === "assistant") {
+            return (<Ai2walletRenderer key={`${message.id}-${i}`} part={part} />)
+        }
+        return null;
+    })}
+))}
+................
+```
+
+#### Update your route handler `api/chat/route.ts`
+```typescript
+// Other imports
+import getAi2walletTools from 'ai2wallet-sdk/tools';
+
+const mcpServerURL = process.env.MCP_SERVER_URL;
+// Allow streaming responses up to 300 seconds
+export const maxDuration = 300;
+
+export async function POST(req: Request) {
+  const { messages }: { messages: UIMessage[] } = await req.json();
+  const stream = createUIMessageStream<any>({
+    execute: async ({ writer }: any) => {
+      const tools = await getAi2walletTools(mcpServerURL, writer);
+      const result = streamText({
+        system: 'You are a helpful assistant that can answer questions and use tools',
+        model: google('gemini-2.5-flash'), 
+        messages: await convertToModelMessages(messages),
+        tools,
+        timeout: { totalMs: 300000 }
+      });
+      writer.merge(result.toUIMessageStream());
+    },
+  });
+  return createUIMessageStreamResponse({ stream });
+}
+
+```

@@ -3,11 +3,9 @@ import {
   UIMessage,
   convertToModelMessages,
   createUIMessageStream,
-  createUIMessageStreamResponse,
-  stepCountIs
+  createUIMessageStreamResponse
 } from 'ai';
-//import { google } from '@ai-sdk/google'; //uncomment to use Gemini model
-import { groq } from '@ai-sdk/groq';
+import { google } from '@ai-sdk/google'; 
 import getAi2walletTools from 'ai2wallet-sdk/tools';
 
 const mcpServerURL = process.env.MCP_SERVER_URL as string;
@@ -21,15 +19,13 @@ export async function POST(req: Request) {
   const stream = createUIMessageStream<any>({
     execute: async ({ writer }: any) => {
 
-      const tools = await getAi2walletTools(mcpServerURL, writer) as any;
+      const tools = await getAi2walletTools(mcpServerURL, writer);
 
       const result = streamText({
         system: 'You are a helpful assistant that can answer questions and use tools',
-        //model: google('gemini-2.5-flash'), //uncomment to use Gemini model
-        model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
+        model: google('gemini-2.5-flash'), 
         messages: await convertToModelMessages(messages),
         tools,
-        //stopWhen: stepCountIs(1),
         timeout: { totalMs: 300000 }
       });
 

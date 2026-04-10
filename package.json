@@ -2,6 +2,7 @@
   "name": "vercel-ai-agent",
   "version": "0.1.0",
   "private": true,
+  "description": "Vercel AI Agent Ai2wallet Starter Kit",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -20,7 +21,7 @@
     "@streamdown/mermaid": "^1.0.2",
     "@wagmi/core": "^3.4.0",
     "ai": "^6.0.78",
-    "ai2wallet-sdk": "file:../../ai2wallet-sdk",
+    "ai2wallet-sdk": "^0.0.6-beta",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
